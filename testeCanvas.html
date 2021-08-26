@@ -91,24 +91,32 @@
                 console.log("Player is moving RIGHT")
                 if (player.a + PLAYER_WIDTH < gameArea.canvas.width)
                     player.a = player.a + PLAYER_WIDTH
+                else
+                    player.a = 0
             },
 
             ArrowLeft: function () {
                 console.log("Player is moving LEFT")
                 if (player.a - PLAYER_WIDTH >= 0)
                     player.a = player.a - PLAYER_WIDTH
+                else
+                    player.a = gameArea.canvas.width - PLAYER_WIDTH
             },
 
             ArrowUp: function () {
                 console.log("Player is moving UP")
                 if (player.b - PLAYER_HEIGHT >= 0)
                     player.b = player.b - PLAYER_HEIGHT
+                else
+                    player.b = gameArea.canvas.height - PLAYER_HEIGHT
             },
 
             ArrowDown: function () {
                 console.log("Player is moving DOWN")
                 if (player.b + PLAYER_HEIGHT < gameArea.canvas.height)
                     player.b = player.b + PLAYER_HEIGHT
+                else
+                    player.b = 0
             }
 
         }
