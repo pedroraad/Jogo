@@ -34,9 +34,10 @@
 
         function startGame() {
             gameArea.start()
-            player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", 0, 0)
+            player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", PLAYER_WIDTH, PLAYER_HEIGHT)
             fruitInterval = 2000
             gameOver = false
+            player.body.push(new bodyPiece(player.body[player.body.length - 1].a - PLAYER_WIDTH, player.body[player.body.length - 1].b))
         }
 
         var gameArea = {
@@ -67,12 +68,16 @@
         function component(width, height, color, a, b) {
             this.width = width
             this.height = height
-            this.a = a
-            this.b = b
+            this.body = [new bodyPiece(a, b)]
+            this.firstPiece = this.body[0]
+            this.direction = "ArrowRight"
             this.update = function () {
                 ctx = gameArea.context
                 ctx.fillStyle = color
-                ctx.fillRect(this.a, this.b, this.width, this.height)
+                let i
+                for (i = 0; i < this.body.length; i++) {
+                    ctx.fillRect(this.body[i].a, this.body[i].b, this.width, this.height)
+                }
             }
         }
 
@@ -86,37 +91,66 @@
             }
         }
 
+        var bodyPiece = function (a, b) {
+            this.a = a
+            this.b = b
+        }
+
         const movPlayer = {
             ArrowRight: function () {
                 console.log("Player is moving RIGHT")
-                if (player.a + PLAYER_WIDTH < gameArea.canvas.width)
-                    player.a = player.a + PLAYER_WIDTH
+                let firstPieceA = player.firstPiece.a
+                let firstPieceB = player.firstPiece.b
+                if (player.firstPiece.a + PLAYER_WIDTH < gameArea.canvas.width)
+                    player.firstPiece.a += PLAYER_WIDTH
                 else
-                    player.a = 0
+                    player.firstPiece.a = 0
+                if (player.body.length > 1) {
+                    var oldPositionA
+                    var oldPositionB
+                    for (let i = 1; i < player.body.length; i++) {
+                        if (i == 1) {
+                            oldPositionA = player.body[i].a
+                            oldPositionB = player.body[i].b
+                            console.log(player.body[i].a)
+                            player.body[i].a = firstPieceA
+                            console.log(player.body[i].a)
+                            player.body[i].b = firstPieceB
+                        }
+                        else {
+                            let aux = player.body[i].a
+                            player.body[i].a = oldPositionA
+                            oldPositionA = aux
+                            aux = player.body[i].b
+                            player.body[i].b = oldPositionB
+                            oldPositionB = aux
+                        }
+                    }
+                }
             },
 
             ArrowLeft: function () {
                 console.log("Player is moving LEFT")
-                if (player.a - PLAYER_WIDTH >= 0)
-                    player.a = player.a - PLAYER_WIDTH
+                if (player.firstPiece.a - PLAYER_WIDTH >= 0)
+                    player.firstPiece.a -= PLAYER_WIDTH
                 else
-                    player.a = gameArea.canvas.width - PLAYER_WIDTH
+                    player.firstPiece.a = gameArea.canvas.width - PLAYER_WIDTH
             },
 
             ArrowUp: function () {
                 console.log("Player is moving UP")
-                if (player.b - PLAYER_HEIGHT >= 0)
-                    player.b = player.b - PLAYER_HEIGHT
+                if (player.firstPiece.b - PLAYER_HEIGHT >= 0)
+                    player.firstPiece.b -= PLAYER_HEIGHT
                 else
-                    player.b = gameArea.canvas.height - PLAYER_HEIGHT
+                    player.firstPiece.b = gameArea.canvas.height - PLAYER_HEIGHT
             },
 
             ArrowDown: function () {
                 console.log("Player is moving DOWN")
-                if (player.b + PLAYER_HEIGHT < gameArea.canvas.height)
-                    player.b = player.b + PLAYER_HEIGHT
+                if (player.firstPiece.b + PLAYER_HEIGHT < gameArea.canvas.height)
+                    player.firstPiece.b += PLAYER_HEIGHT
                 else
-                    player.b = 0
+                    player.firstPiece.b = 0
             }
 
         }
@@ -145,7 +179,7 @@
                         b = Math.random() * (gameArea.canvas.height)
                         b = parseInt(b)
                     } while (b % PLAYER_HEIGHT != 0)
-                    if (a == player.a && b == player.b)
+                    if (a == player.firstPiece.a && b == player.firstPiece.b)
                         freeSlot = false
                     else for (i = 0; i < fruits.length; i++) {
                         if (a == fruits[i].x && b == fruits[i].y)
@@ -190,7 +224,7 @@
 
         function verifyPoint() {
             for (i = 0; i < fruits.length; i++) {
-                if (player.a == fruits[i].x && player.b == fruits[i].y) {
+                if (player.firstPiece.a == fruits[i].x && player.firstPiece.b == fruits[i].y) {
                     fruits.splice(i, 1)
                     points++;
                 }
@@ -198,7 +232,7 @@
         }
 
         function increaseDifficulty() {
-            if (fruitInterval > 1000){
+            if (fruitInterval > 1000) {
                 fruitInterval -= 100
                 clearInterval(fruitI)
                 fruitI = setInterval(generateFruit, fruitInterval)
@@ -206,6 +240,40 @@
             }
         }
 
+        // Funções experimentais para o jogo Snake-----------------------------------------
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key.startsWith("Arrow"))
+                player.direction = event.key
+        })
+
+        function autoMovePlayer() {
+            if (playerMovs[player.direction]) {
+                playerMovs[player.direction]()
+            }
+        }
+
+        const playerMovs = {
+            ArrowRight: function () {
+                movPlayer.ArrowRight()
+            },
+
+            ArrowLeft: function () {
+                movPlayer.ArrowLeft()
+            },
+
+            ArrowUp: function () {
+                movPlayer.ArrowUp()
+            },
+
+            ArrowDown: function () {
+                movPlayer.ArrowDown()
+            },
+        }
+
+
+
+        setInterval(autoMovePlayer, 1000)
 
     </script>
 </body>
