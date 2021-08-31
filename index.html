@@ -19,195 +19,200 @@
     </style>
 </head>
 
-<body onload="startGame()">
-    <script>
-        const PLAYER_WIDTH = 300 / 15
-        const PLAYER_HEIGHT = 300 / 15
-        var fruitInterval = 2000
+<body>
+    <audio id="music" src="musica.mp3" loop>
+        <script>
+            const PLAYER_WIDTH = 300 / 15
+            const PLAYER_HEIGHT = 300 / 15
+            const audio = document.getElementById("music")
+            var fruitInterval = 2000
+            
+            var player
+            var points = 0;
 
-        var player
-        var points = 0;
-
-        var gameOver
-        var difficulty
-        var fruitI
-
-        function startGame() {
-            gameArea.start()
-            player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", 0, 0)
-            fruitInterval = 2000
-            gameOver = false
-        }
-
-        var gameArea = {
-            canvas: document.createElement('canvas'),
-            start: function () {
-                this.canvas.height = 540
-                this.canvas.weight = 200
-                this.context = this.canvas.getContext('2d')
-                document.body.insertBefore(this.canvas, document.body.childNodes[0])
-                this.interval = setInterval(updateGameArea, 20)
-                difficulty = setInterval(increaseDifficulty, 10000)
-                clearInterval(fruitI)
-                fruitI = setInterval(generateFruit, fruitInterval)
-            },
-            clear: function () {
-                ctx = this.canvas.getContext('2d')
-                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-                ctx.font = 100 + " " + 50;
-                ctx.fillStyle = "gray";
-                ctx.fillText("Score: " + points.toString(), this.canvas.width - 50, 15);
-            },
-            stop: function () {
-                clearInterval(this.interval)
+            var gameOver
+            var difficulty
+            var fruitI
+            
+            function startGame() {
+                audio.load()
+                audio.play()
+                gameArea.start()
+                player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", 0, 0)
+                fruitInterval = 2000
+                gameOver = false
             }
-        }
-
-
-        function component(width, height, color, a, b) {
-            this.width = width
-            this.height = height
-            this.a = a
-            this.b = b
-            this.update = function () {
-                ctx = gameArea.context
-                ctx.fillStyle = color
-                ctx.fillRect(this.a, this.b, this.width, this.height)
-            }
-        }
-
-        function updateGameArea() {
-            if (!gameOver) {
-                gameArea.clear()
-                player.update()
-                updateFruits()
-                verifyPoint()
-                verifyGameOver()
-            }
-        }
-
-        const movPlayer = {
-            ArrowRight: function () {
-                console.log("Player is moving RIGHT")
-                if (player.a + PLAYER_WIDTH < gameArea.canvas.width)
-                    player.a = player.a + PLAYER_WIDTH
-                else
-                    player.a = 0
-            },
-
-            ArrowLeft: function () {
-                console.log("Player is moving LEFT")
-                if (player.a - PLAYER_WIDTH >= 0)
-                    player.a = player.a - PLAYER_WIDTH
-                else
-                    player.a = gameArea.canvas.width - PLAYER_WIDTH
-            },
-
-            ArrowUp: function () {
-                console.log("Player is moving UP")
-                if (player.b - PLAYER_HEIGHT >= 0)
-                    player.b = player.b - PLAYER_HEIGHT
-                else
-                    player.b = gameArea.canvas.height - PLAYER_HEIGHT
-            },
-
-            ArrowDown: function () {
-                console.log("Player is moving DOWN")
-                if (player.b + PLAYER_HEIGHT < gameArea.canvas.height)
-                    player.b = player.b + PLAYER_HEIGHT
-                else
-                    player.b = 0
-            }
-
-        }
-
-        document.addEventListener('keydown', function (event) {
-            if (movPlayer[event.key]())
-                movPlayer[event.key]()
-        })
-
-        var fruit = function (a, b) {
-            this.x = a
-            this.y = b
-        }
-
-        var fruits = []
-
-        function generateFruit() {
-            if (!gameOver) {
-                do {
-                    freeSlot = true
-                    do {
-                        a = Math.random() * (gameArea.canvas.width)
-                        a = parseInt(a)
-                    } while (a % PLAYER_WIDTH != 0)
-                    do {
-                        b = Math.random() * (gameArea.canvas.height)
-                        b = parseInt(b)
-                    } while (b % PLAYER_HEIGHT != 0)
-                    if (a == player.a && b == player.b)
-                        freeSlot = false
-                    else for (i = 0; i < fruits.length; i++) {
-                        if (a == fruits[i].x && b == fruits[i].y)
-                            freeSlot = false
-                    }
-                } while (!freeSlot)
-
-                fruits.push(new fruit(a, b))
-            }
-        }
-
-        function updateFruits() {
-            for (i = 0; i < fruits.length; i++) {
-                gameArea.context.fillStyle = "green"
-                gameArea.context.fillRect(fruits[i].x, fruits[i].y, PLAYER_WIDTH, PLAYER_HEIGHT)
-            }
-        }
-
-        function verifyGameOver() {
-            if (fruits.length > 10) {
-                ctx = gameArea.context
-                ctx.fillStyle = 'rgba(128, 128, 128, 0.707)'
-                ctx.fillRect(0, 0, 300, 540)
-                ctx.font = 300 + " " + 75;
-                ctx.fillStyle = "white";
-                ctx.textAlign = "center"
-                ctx.fillText("Score: " + points, gameArea.canvas.width / 2, gameArea.canvas.height / 2 - 25);
-                ctx.fillText("Press ENTER to continue", gameArea.canvas.width / 2, gameArea.canvas.height / 2 + 25);
-                fruits.splice(0, fruits.length - 1)
-                points = 0
-                gameOver = true
-                clearInterval(difficulty)
-                clearInterval(fruitI)
-                gameArea.stop()
-            }
-        }
-
-        document.addEventListener("keydown", function (event) {
-            if (gameOver && event.key == "Enter")
-                startGame()
-        })
-
-        function verifyPoint() {
-            for (i = 0; i < fruits.length; i++) {
-                if (player.a == fruits[i].x && player.b == fruits[i].y) {
-                    fruits.splice(i, 1)
-                    points++;
+            
+            var gameArea = {
+                canvas: document.createElement('canvas'),
+                start: function () {
+                    this.canvas.height = 540
+                    this.canvas.weight = 200
+                    this.context = this.canvas.getContext('2d')
+                    document.body.insertBefore(this.canvas, document.body.childNodes[0])
+                    this.interval = setInterval(updateGameArea, 20)
+                    difficulty = setInterval(increaseDifficulty, 10000)
+                    clearInterval(fruitI)
+                    fruitI = setInterval(generateFruit, fruitInterval)
+                },
+                clear: function () {
+                    ctx = this.canvas.getContext('2d')
+                    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+                    ctx.font = 100 + " " + 50;
+                    ctx.fillStyle = "gray";
+                    ctx.fillText("Score: " + points.toString(), this.canvas.width - 50, 15);
+                },
+                stop: function () {
+                    clearInterval(this.interval)
                 }
             }
-        }
-
-        function increaseDifficulty() {
-            if (fruitInterval > 1000){
-                fruitInterval -= 100
-                clearInterval(fruitI)
-                fruitI = setInterval(generateFruit, fruitInterval)
-                console.log(fruitInterval)
+            
+            
+            function component(width, height, color, a, b) {
+                this.width = width
+                this.height = height
+                this.a = a
+                this.b = b
+                this.update = function () {
+                    ctx = gameArea.context
+                    ctx.fillStyle = color
+                    ctx.fillRect(this.a, this.b, this.width, this.height)
+                }
             }
-        }
-
-
-    </script>
-</body>
-
-</html>
+            
+            function updateGameArea() {
+                if (!gameOver) {
+                    gameArea.clear()
+                    player.update()
+                    updateFruits()
+                    verifyPoint()
+                    verifyGameOver()
+                }
+            }
+            
+            const movPlayer = {
+                ArrowRight: function () {
+                    console.log("Player is moving RIGHT")
+                    if (player.a + PLAYER_WIDTH < gameArea.canvas.width)
+                    player.a = player.a + PLAYER_WIDTH
+                    else
+                    player.a = 0
+                },
+                
+                ArrowLeft: function () {
+                    console.log("Player is moving LEFT")
+                    if (player.a - PLAYER_WIDTH >= 0)
+                    player.a = player.a - PLAYER_WIDTH
+                    else
+                    player.a = gameArea.canvas.width - PLAYER_WIDTH
+                },
+                
+                ArrowUp: function () {
+                    console.log("Player is moving UP")
+                    if (player.b - PLAYER_HEIGHT >= 0)
+                    player.b = player.b - PLAYER_HEIGHT
+                    else
+                    player.b = gameArea.canvas.height - PLAYER_HEIGHT
+                },
+                
+                ArrowDown: function () {
+                    console.log("Player is moving DOWN")
+                    if (player.b + PLAYER_HEIGHT < gameArea.canvas.height)
+                    player.b = player.b + PLAYER_HEIGHT
+                    else
+                    player.b = 0
+                }
+                
+            }
+            
+            document.addEventListener('keydown', function (event) {
+                if (movPlayer[event.key]())
+                movPlayer[event.key]()
+            })
+            
+            var fruit = function (a, b) {
+                this.x = a
+                this.y = b
+            }
+            
+            var fruits = []
+            
+            function generateFruit() {
+                if (!gameOver) {
+                    do {
+                        freeSlot = true
+                        do {
+                            a = Math.random() * (gameArea.canvas.width)
+                            a = parseInt(a)
+                        } while (a % PLAYER_WIDTH != 0)
+                        do {
+                            b = Math.random() * (gameArea.canvas.height)
+                            b = parseInt(b)
+                        } while (b % PLAYER_HEIGHT != 0)
+                        if (a == player.a && b == player.b)
+                        freeSlot = false
+                        else for (i = 0; i < fruits.length; i++) {
+                            if (a == fruits[i].x && b == fruits[i].y)
+                            freeSlot = false
+                        }
+                    } while (!freeSlot)
+                    
+                    fruits.push(new fruit(a, b))
+                }
+            }
+            
+            function updateFruits() {
+                for (i = 0; i < fruits.length; i++) {
+                    gameArea.context.fillStyle = "green"
+                    gameArea.context.fillRect(fruits[i].x, fruits[i].y, PLAYER_WIDTH, PLAYER_HEIGHT)
+                }
+            }
+            
+            function verifyGameOver() {
+                if (fruits.length > 10) {
+                    ctx = gameArea.context
+                    ctx.fillStyle = 'rgba(128, 128, 128, 0.707)'
+                    ctx.fillRect(0, 0, 300, 540)
+                    ctx.font = 300 + " " + 75;
+                    ctx.fillStyle = "white";
+                    ctx.textAlign = "center"
+                    ctx.fillText("Score: " + points, gameArea.canvas.width / 2, gameArea.canvas.height / 2 - 25);
+                    ctx.fillText("Press ENTER to continue", gameArea.canvas.width / 2, gameArea.canvas.height / 2 + 25);
+                    fruits.splice(0, fruits.length - 1)
+                    points = 0
+                    gameOver = true
+                    clearInterval(difficulty)
+                    clearInterval(fruitI)
+                    gameArea.stop()
+                }
+            }
+            
+            document.addEventListener("keydown", function (event) {
+                if (gameOver && event.key == "Enter")
+                startGame()
+            })
+            
+            function verifyPoint() {
+                for (i = 0; i < fruits.length; i++) {
+                    if (player.a == fruits[i].x && player.b == fruits[i].y) {
+                        fruits.splice(i, 1)
+                        points++;
+                    }
+                }
+            }
+            
+            function increaseDifficulty() {
+                if (fruitInterval > 1000) {
+                    fruitInterval -= 100
+                    clearInterval(fruitI)
+                    fruitI = setInterval(generateFruit, fruitInterval)
+                    console.log(fruitInterval)
+                }
+            }
+            
+            startGame()
+            
+        </script>
+    </body>
+    
+    </html>
