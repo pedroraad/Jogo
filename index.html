@@ -29,6 +29,8 @@
         <script>
             const PLAYER_WIDTH = 300 / 15
             const PLAYER_HEIGHT = 300 / 15
+            const audio = document.getElementById("music")
+            
             var fruitInterval = 2000
             
             var player
@@ -39,6 +41,8 @@
             var fruitI
             
             function startGame() {
+                audio.volume = 0.1
+                audio.play()
                 document.getElementById("music").play()
                 gameArea.start()
                 player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", 0, 0)
