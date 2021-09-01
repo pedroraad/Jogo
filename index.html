@@ -42,8 +42,8 @@
             
             function startGame() {
                 audio.volume = 0.1
+                audio.load()
                 audio.play()
-                document.getElementById("music").play()
                 gameArea.start()
                 player = new component(PLAYER_WIDTH, PLAYER_HEIGHT, "red", 0, 0)
                 fruitInterval = 2000
